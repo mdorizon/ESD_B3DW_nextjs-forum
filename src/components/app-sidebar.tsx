@@ -29,9 +29,6 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { LoginForm } from "@/components/login-form";
-import { SignupForm } from "@/components/signup-form";
 import {
   LogOut,
   User,
@@ -47,7 +44,7 @@ import { toast } from "sonner";
 import Link from "next/link";
 import Image from "next/image";
 import ConversationService from "@/services/conversation.service";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import ConversationDeleteButton from "@/components/app/conversation/ConversationDeleteButton";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -58,12 +55,11 @@ interface UserConversation {
 }
 
 export function AppSidebar() {
+  const router = useRouter();
   const { data: session, isPending } = useSession();
   const params = useParams();
   const activeConversationId = params?.id as string | undefined;
   const queryClient = useQueryClient();
-  const [loginOpen, setLoginOpen] = useState(false);
-  const [signupOpen, setSignupOpen] = useState(false);
   const [userConversations, setUserConversations] = useState<
     UserConversation[]
   >([]);
@@ -118,6 +114,13 @@ export function AppSidebar() {
       .slice(0, 2);
   };
 
+  const handleLogin = () => {
+    router.push("/login");
+  };
+  const handleSignup = () => {
+    router.push("/signup");
+  };
+
   return (
     <Sidebar>
       <SidebarHeader>
@@ -166,10 +169,14 @@ export function AppSidebar() {
                             <div className="flex items-center gap-1 group/item">
                               <SidebarMenuSubButton
                                 asChild
-                                isActive={activeConversationId === conversation.id}
+                                isActive={
+                                  activeConversationId === conversation.id
+                                }
                                 className="flex-1"
                               >
-                                <Link href={`/conversations/${conversation.id}`}>
+                                <Link
+                                  href={`/conversations/${conversation.id}`}
+                                >
                                   <span className="truncate">
                                     {conversation.title || "Sans titre"}
                                   </span>
@@ -250,9 +257,11 @@ export function AppSidebar() {
                 >
                   <DropdownMenuLabel>Mon compte</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>
-                    <User className="mr-2 h-4 w-4" />
-                    <span>Profil</span>
+                  <DropdownMenuItem asChild>
+                    <Link href="/account">
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Profil</span>
+                    </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleSignOut}>
@@ -266,44 +275,30 @@ export function AppSidebar() {
         ) : (
           <SidebarMenu>
             <SidebarMenuItem>
-              <Dialog open={loginOpen} onOpenChange={setLoginOpen}>
-                <DialogTrigger asChild>
-                  <SidebarMenuButton size="lg">
-                    <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-muted">
-                      <LogIn className="size-4" />
-                    </div>
-                    <div className="flex flex-col gap-0.5 leading-none">
-                      <span className="font-semibold">Se connecter</span>
-                      <span className="text-xs text-muted-foreground">
-                        Accédez à votre compte
-                      </span>
-                    </div>
-                  </SidebarMenuButton>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[425px]">
-                  <LoginForm onSuccess={() => setLoginOpen(false)} />
-                </DialogContent>
-              </Dialog>
+              <SidebarMenuButton size="lg" onClick={handleLogin}>
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-muted">
+                  <LogIn className="size-4" />
+                </div>
+                <div className="flex flex-col gap-0.5 leading-none">
+                  <span className="font-semibold">Se connecter</span>
+                  <span className="text-xs text-muted-foreground">
+                    Accédez à votre compte
+                  </span>
+                </div>
+              </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <Dialog open={signupOpen} onOpenChange={setSignupOpen}>
-                <DialogTrigger asChild>
-                  <SidebarMenuButton size="lg">
-                    <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                      <UserPlus className="size-4" />
-                    </div>
-                    <div className="flex flex-col gap-0.5 leading-none">
-                      <span className="font-semibold">Créer un compte</span>
-                      <span className="text-xs text-muted-foreground">
-                        Rejoignez la communauté
-                      </span>
-                    </div>
-                  </SidebarMenuButton>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[425px]">
-                  <SignupForm onSuccess={() => setSignupOpen(false)} />
-                </DialogContent>
-              </Dialog>
+              <SidebarMenuButton size="lg" onClick={handleSignup}>
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                  <UserPlus className="size-4" />
+                </div>
+                <div className="flex flex-col gap-0.5 leading-none">
+                  <span className="font-semibold">Créer un compte</span>
+                  <span className="text-xs text-muted-foreground">
+                    Rejoignez la communauté
+                  </span>
+                </div>
+              </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
         )}

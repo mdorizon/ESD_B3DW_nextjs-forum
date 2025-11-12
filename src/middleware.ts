@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { auth } from "@/lib/auth";
 
 // Routes qui nécessitent une authentification
-const protectedRoutes = ["/profile", "/settings"];
+const protectedRoutes = ["/profile", "/settings", "/account"];
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
@@ -14,13 +13,12 @@ export async function middleware(request: NextRequest) {
   );
 
   if (isProtectedRoute) {
-    const session = await auth.api.getSession({
-      headers: request.headers,
-    });
+    // Vérifier la présence d'un cookie de session
+    const sessionCookie = request.cookies.get("better-auth.session_token");
 
-    if (!session) {
-      // Rediriger vers la page d'accueil si non authentifié
-      return NextResponse.redirect(new URL("/", request.url));
+    if (!sessionCookie) {
+      // Rediriger vers la page de login si non authentifié
+      return NextResponse.redirect(new URL("/login", request.url));
     }
   }
 
