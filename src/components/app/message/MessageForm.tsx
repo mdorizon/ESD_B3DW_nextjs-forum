@@ -28,8 +28,7 @@ export default function MessageForm({ conversationId }: MessageFormProps) {
     },
     onSuccess: () => {
       reset();
-      toast.success("Message sent successfully!");
-      // Invalidate and refetch
+      toast.success("Message envoyé avec succès !");
       queryClient.invalidateQueries({ queryKey: ["messages"] });
     },
   });
@@ -40,10 +39,9 @@ export default function MessageForm({ conversationId }: MessageFormProps) {
 
   const contentWatch = watch("content");
 
-  // Si l'utilisateur n'est pas connecté, afficher un message
   if (!session?.user) {
     return (
-      <div className="relative my-5 p-4 border border-muted rounded-md bg-muted/50">
+      <div className="p-4 border border-muted rounded-lg bg-muted/30">
         <p className="text-center text-muted-foreground">
           Vous devez être connecté pour envoyer un message.
         </p>
@@ -52,11 +50,11 @@ export default function MessageForm({ conversationId }: MessageFormProps) {
   }
 
   return (
-    <form className="relative my-5" onSubmit={handleSubmit(onSubmit)}>
+    <form className="relative" onSubmit={handleSubmit(onSubmit)}>
       <Input
         type="text"
-        placeholder="Type your message..."
-        className="py-6"
+        placeholder="Écrivez votre message..."
+        className="py-6 pr-24"
         {...register("content")}
       />
       <Button
@@ -67,7 +65,7 @@ export default function MessageForm({ conversationId }: MessageFormProps) {
         }
       >
         {mutation.isPending && <Spinner className="mr-2" />}
-        Send
+        Envoyer
       </Button>
     </form>
   );

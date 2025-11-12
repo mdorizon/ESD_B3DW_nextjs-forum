@@ -1,4 +1,9 @@
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
 import { getRelativeTime } from "@/lib/date";
 import { ConversationWithExtend } from "@/types/conversation.type";
 import Link from "next/link";
@@ -31,7 +36,8 @@ export default function ConversationCard({
   return (
     <Link href={`/conversations/${conversation.id}`}>
       <Card className="cursor-pointer hover:shadow-md transition-all">
-        <CardHeader className="pb-3">
+        <CardHeader className="-mb-4">{conversation?.title}</CardHeader>
+        <CardContent>
           <div className="flex items-center gap-2">
             <Avatar className="size-6 rounded-lg">
               <AvatarFallback className="rounded-lg text-xs">
@@ -51,8 +57,7 @@ export default function ConversationCard({
               {conversation.author?.name || "Utilisateur inconnu"}
             </span>
           </div>
-        </CardHeader>
-        <CardContent className="pb-3">{conversation?.title}</CardContent>
+        </CardContent>
         <CardFooter className="w-full flex justify-between ">
           <p className="text-sm italic text-zinc-500">
             {getRelativeTime(conversation.createdAt)}

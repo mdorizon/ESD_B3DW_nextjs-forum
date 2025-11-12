@@ -3,7 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import ReactQueryProvider from "@/providers/ReactQueryProvider";
-import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 
 const geistSans = Geist({
@@ -34,12 +34,7 @@ export default function RootLayout({
         <ReactQueryProvider>
           <SidebarProvider>
             <AppSidebar />
-            <SidebarInset>
-              <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-                <SidebarTrigger />
-              </header>
-              {children}
-            </SidebarInset>
+            <SidebarInset>{children}</SidebarInset>
           </SidebarProvider>
         </ReactQueryProvider>
 

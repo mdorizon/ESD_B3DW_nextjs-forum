@@ -27,7 +27,11 @@ export default function DeleteButton({
     },
     onSuccess: () => {
       toast.success(`${entityName} deleted successfully!`);
-      queryClient.invalidateQueries({ queryKey: [queryKey] });
+      // Invalider immédiatement le cache pour un retour visuel instantané
+      queryClient.invalidateQueries({
+        queryKey: [queryKey],
+        refetchType: 'active' // Force le refetch immédiat
+      });
     },
   });
 

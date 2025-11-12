@@ -9,6 +9,11 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
 } from "@/components/ui/sidebar";
 import {
   DropdownMenu,
@@ -18,20 +23,82 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { LoginForm } from "@/components/login-form";
 import { SignupForm } from "@/components/signup-form";
-import { LogOut, User, ChevronUp, Home, MessageSquare, LogIn, UserPlus } from "lucide-react";
-import { useState } from "react";
+import {
+  LogOut,
+  User,
+  ChevronUp,
+  MessageSquare,
+  LogIn,
+  UserPlus,
+  ChevronDown,
+  Home,
+} from "lucide-react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import Link from "next/link";
 import Image from "next/image";
+import ConversationService from "@/services/conversation.service";
+import { useParams } from "next/navigation";
+import ConversationDeleteButton from "@/components/app/conversation/ConversationDeleteButton";
+import { useQueryClient } from "@tanstack/react-query";
+
+interface UserConversation {
+  id: string;
+  title: string | null;
+  authorId: string;
+}
 
 export function AppSidebar() {
   const { data: session, isPending } = useSession();
+  const params = useParams();
+  const activeConversationId = params?.id as string | undefined;
+  const queryClient = useQueryClient();
   const [loginOpen, setLoginOpen] = useState(false);
   const [signupOpen, setSignupOpen] = useState(false);
+  const [userConversations, setUserConversations] = useState<
+    UserConversation[]
+  >([]);
+
+  const fetchUserConversations = () => {
+    if (session?.user) {
+      ConversationService.fetchConversations()
+        .then((conversations) => {
+          const filtered = conversations.filter(
+            (conv: UserConversation) => conv.authorId === session.user.id
+          );
+          setUserConversations(filtered);
+        })
+        .catch((error) =>
+          console.error("Error fetching conversations:", error)
+        );
+    }
+  };
+
+  useEffect(() => {
+    fetchUserConversations();
+  }, [session?.user]);
+
+  // Écouter les changements du cache "conversations" pour rafraîchir la sidebar
+  useEffect(() => {
+    const unsubscribe = queryClient.getQueryCache().subscribe((event) => {
+      if (
+        event?.query?.queryKey?.[0] === "conversations" &&
+        event.type === "updated"
+      ) {
+        fetchUserConversations();
+      }
+    });
+    return unsubscribe;
+  }, [session?.user, queryClient]);
 
   const handleSignOut = async () => {
     try {
@@ -63,7 +130,6 @@ export function AppSidebar() {
                 </div>
                 <div className="flex flex-col gap-0.5 leading-none">
                   <span className="font-semibold">Forum</span>
-                  <span className="text-xs">Discussion Board</span>
                 </div>
               </Link>
             </SidebarMenuButton>
@@ -71,24 +137,72 @@ export function AppSidebar() {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild>
-              <Link href="/">
-                <Home />
-                <span>Accueil</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild>
-              <Link href="/conversations">
-                <MessageSquare />
-                <span>Conversations</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link href="/">
+                    <Home />
+                    <span>Conversations</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              {session?.user && userConversations.length > 0 && (
+                <Collapsible defaultOpen className="group/collapsible">
+                  <SidebarMenuItem>
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuButton>
+                        <MessageSquare />
+                        <span>Vos conversations</span>
+                        <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <SidebarMenuSub>
+                        {userConversations.slice(0, 5).map((conversation) => (
+                          <SidebarMenuSubItem key={conversation.id}>
+                            <div className="flex items-center gap-1 group/item">
+                              <SidebarMenuSubButton
+                                asChild
+                                isActive={activeConversationId === conversation.id}
+                                className="flex-1"
+                              >
+                                <Link href={`/conversations/${conversation.id}`}>
+                                  <span className="truncate">
+                                    {conversation.title || "Sans titre"}
+                                  </span>
+                                </Link>
+                              </SidebarMenuSubButton>
+                              <div className="opacity-0 group-hover/item:opacity-100 transition-opacity pr-2">
+                                <ConversationDeleteButton
+                                  id={conversation.id}
+                                  className="h-6 w-6"
+                                />
+                              </div>
+                            </div>
+                          </SidebarMenuSubItem>
+                        ))}
+                        {userConversations.length > 5 && (
+                          <SidebarMenuSubItem>
+                            <SidebarMenuSubButton asChild>
+                              <Link href="/?filter=mine">
+                                <span className="text-xs italic">
+                                  Voir toutes ({userConversations.length})
+                                </span>
+                              </Link>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        )}
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  </SidebarMenuItem>
+                </Collapsible>
+              )}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
         {isPending ? (

@@ -43,32 +43,18 @@ export default function MessageItem({ message }: MessageItemProps) {
   };
 
   return (
-    <div className="border shadow-sm rounded-md p-4 relative">
-      {isOwner && (
-        <div className="absolute top-2 right-2 flex gap-1">
-          <EditMessageDialog
-            messageId={message.id}
-            currentContent={message.content}
-            onSuccess={handleEditSuccess}
-          />
-          <DeleteButton
-            entityName="Message"
-            queryKey="messages"
-            onDelete={MessageService.deleteById}
-            id={message.id}
-          />
-        </div>
-      )}
-
-      <div className="flex items-start gap-3">
-        <Avatar className="size-8 rounded-lg">
-          <AvatarFallback className="rounded-lg">
+    <div className={`flex ${isOwner ? "justify-end" : "justify-start"} mb-2`}>
+      <div className={`flex gap-2 max-w-[70%] ${isOwner ? "flex-row-reverse" : "flex-row"}`}>
+        {/* Avatar */}
+        <Avatar className="size-8 rounded-full shrink-0">
+          <AvatarFallback className="rounded-full bg-primary/10 text-primary text-xs">
             {message.author?.image ? (
               <Image
                 src={message.author.image}
-                alt="Profile-picture"
+                alt={`Photo de profil de ${message.author.name}`}
                 width={32}
                 height={32}
+                className="rounded-full"
               />
             ) : (
               getInitials(message.author?.name || "User")
@@ -76,21 +62,55 @@ export default function MessageItem({ message }: MessageItemProps) {
           </AvatarFallback>
         </Avatar>
 
-        <div className="flex-1">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="font-semibold text-sm">
-              {message.author?.name || "Utilisateur inconnu"}
-            </span>
-            <span className="text-xs text-muted-foreground">
-              {new Date(message.createdAt).toLocaleDateString("fr-FR")}
+        {/* Bulle de message */}
+        <div className="flex flex-col group/message">
+          <div
+            className={`rounded-2xl px-4 py-2 ${
+              isOwner
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted"
+            }`}
+          >
+            <p className="text-sm leading-relaxed wrap-break-word">
+              {message.content}
+            </p>
+          </div>
+
+          {/* Métadonnées et actions sous le message */}
+          <div className={`flex items-center gap-2 mt-0.5 px-1 ${isOwner ? "flex-row-reverse" : "flex-row"}`}>
+            <span className="text-[11px] text-muted-foreground">
+              {new Date(message.createdAt).toLocaleTimeString("fr-FR", {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
             </span>
             {isEdited && (
-              <span className="text-xs text-muted-foreground italic">
-                (modifié)
+              <span className="text-[11px] text-muted-foreground italic">
+                modifié
               </span>
             )}
+
+            {/* Boutons d'action style Instagram - visible au hover */}
+            {isOwner && (
+              <div className="flex gap-0.5 opacity-0 group-hover/message:opacity-100 transition-opacity">
+                <div className="scale-75">
+                  <EditMessageDialog
+                    messageId={message.id}
+                    currentContent={message.content}
+                    onSuccess={handleEditSuccess}
+                  />
+                </div>
+                <div className="scale-75">
+                  <DeleteButton
+                    entityName="Message"
+                    queryKey="messages"
+                    onDelete={MessageService.deleteById}
+                    id={message.id}
+                  />
+                </div>
+              </div>
+            )}
           </div>
-          <p className="text-sm">{message.content}</p>
         </div>
       </div>
     </div>
