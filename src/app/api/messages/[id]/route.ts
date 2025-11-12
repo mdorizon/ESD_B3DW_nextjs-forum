@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
-import { requireAuth, isMessageOwner } from "@/lib/auth-utils";
+import { requireAuth, isMessageOwner, getUserWithRole } from "@/lib/auth-utils";
+import { canDeleteMessage } from "@/lib/permissions";
 
 export async function DELETE(
   _request: NextRequest,
@@ -10,10 +11,21 @@ export async function DELETE(
     const user = await requireAuth();
     const { id } = await params;
 
-    // Vérifier que l'utilisateur est le propriétaire
-    const isOwner = await isMessageOwner(user.id, id);
+    // Récupérer le rôle de l'utilisateur
+    const userWithRole = await getUserWithRole(user.id);
 
-    if (!isOwner) {
+    if (!userWithRole) {
+      return NextResponse.json(
+        { error: "Utilisateur introuvable" },
+        { status: 404 }
+      );
+    }
+
+    // Vérifier que l'utilisateur est le propriétaire OU a les permissions de modérateur/admin
+    const isOwner = await isMessageOwner(user.id, id);
+    const hasPermission = canDeleteMessage(userWithRole.role);
+
+    if (!isOwner && !hasPermission) {
       return NextResponse.json(
         { error: "Vous n'êtes pas autorisé à supprimer ce message" },
         { status: 403 }

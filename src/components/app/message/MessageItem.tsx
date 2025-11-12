@@ -9,6 +9,8 @@ import Image from "next/image";
 import EditMessageDialog from "./EditMessageDialog";
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
+import { useUserRole } from "@/hooks/useUserRole";
+import { canDeleteMessage } from "@/lib/permissions";
 
 interface MessageItemProps {
   message: Message & {
@@ -23,8 +25,10 @@ interface MessageItemProps {
 
 export default function MessageItem({ message }: MessageItemProps) {
   const { data: session } = useSession();
+  const { role } = useUserRole();
   const queryClient = useQueryClient();
   const isOwner = session?.user?.id === message.authorId;
+  const canDelete = isOwner || (role ? canDeleteMessage(role) : false);
   const isEdited =
     message.updatedAt &&
     new Date(message.updatedAt).getTime() >
@@ -108,23 +112,27 @@ export default function MessageItem({ message }: MessageItemProps) {
             )}
 
             {/* Boutons d'action style Instagram - visible au hover */}
-            {isOwner && (
+            {(isOwner || canDelete) && (
               <div className="flex gap-0.5 opacity-0 group-hover/message:opacity-100 transition-opacity">
-                <div className="scale-75">
-                  <EditMessageDialog
-                    messageId={message.id}
-                    currentContent={message.content}
-                    onSuccess={handleEditSuccess}
-                  />
-                </div>
-                <div className="scale-75">
-                  <DeleteButton
-                    entityName="Message"
-                    queryKey="messages"
-                    onDelete={MessageService.deleteById}
-                    id={message.id}
-                  />
-                </div>
+                {isOwner && (
+                  <div className="scale-75">
+                    <EditMessageDialog
+                      messageId={message.id}
+                      currentContent={message.content}
+                      onSuccess={handleEditSuccess}
+                    />
+                  </div>
+                )}
+                {canDelete && (
+                  <div className="scale-75">
+                    <DeleteButton
+                      entityName="Message"
+                      queryKey="messages"
+                      onDelete={MessageService.deleteById}
+                      id={message.id}
+                    />
+                  </div>
+                )}
               </div>
             )}
           </div>

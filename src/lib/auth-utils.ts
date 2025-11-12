@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
+import { Role } from "@/generated/prisma";
 
 // Récupère la session de l'utilisateur actuel
 export async function getSession() {
@@ -18,6 +19,22 @@ export async function requireAuth() {
   }
 
   return session.user;
+}
+
+// Récupère l'utilisateur complet avec son rôle depuis la base de données
+export async function getUserWithRole(userId: string) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      image: true,
+      role: true,
+    },
+  });
+
+  return user;
 }
 
 // Vérifie si l'utilisateur est le propriétaire d'une ressource
