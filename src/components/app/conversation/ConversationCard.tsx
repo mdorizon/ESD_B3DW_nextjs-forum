@@ -34,30 +34,36 @@ export default function ConversationCard({
   };
 
   return (
-    <Link href={`/conversations/${conversation.id}`}>
-      <Card className="cursor-pointer hover:shadow-md transition-all">
+    <Card className="cursor-pointer hover:shadow-md transition-all">
+      <Link href={`/conversations/${conversation.id}`}>
         <CardHeader className="-mb-4">{conversation?.title}</CardHeader>
-        <CardContent>
-          <div className="flex items-center gap-2">
-            <Avatar className="size-6 rounded-lg">
-              <AvatarFallback className="rounded-lg text-xs">
-                {conversation.author?.image ? (
-                  <Image
-                    src={conversation.author.image}
-                    alt="Profile-picture"
-                    width={24}
-                    height={24}
-                  />
-                ) : (
-                  getInitials(conversation.author?.name || "User")
-                )}
-              </AvatarFallback>
-            </Avatar>
-            <span className="text-xs text-muted-foreground">
-              {conversation.author?.name || "Utilisateur inconnu"}
-            </span>
-          </div>
-        </CardContent>
+      </Link>
+      <CardContent>
+        <Link
+          href={`/users/${conversation.author?.id}`}
+          className="flex items-center gap-2 w-fit hover:opacity-70 transition-opacity"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <Avatar className="size-6 rounded-lg">
+            <AvatarFallback className="rounded-lg text-xs">
+              {conversation.author?.image ? (
+                <Image
+                  src={conversation.author.image}
+                  alt="Profile-picture"
+                  width={24}
+                  height={24}
+                />
+              ) : (
+                getInitials(conversation.author?.name || "User")
+              )}
+            </AvatarFallback>
+          </Avatar>
+          <span className="text-xs text-muted-foreground">
+            {conversation.author?.name || "Utilisateur inconnu"}
+          </span>
+        </Link>
+      </CardContent>
+      <Link href={`/conversations/${conversation.id}`}>
         <CardFooter className="w-full flex justify-between ">
           <p className="text-sm italic text-zinc-500">
             {getRelativeTime(conversation.createdAt)}
@@ -68,7 +74,7 @@ export default function ConversationCard({
               : "Aucune réponse"}
           </p>
         </CardFooter>
-      </Card>
-    </Link>
+      </Link>
+    </Card>
   );
 }
