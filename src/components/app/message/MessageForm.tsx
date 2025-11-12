@@ -8,12 +8,14 @@ import { MessageDTO } from "@/types/message.type";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { useSession } from "@/lib/auth-client";
 
 interface MessageFormProps {
   conversationId: string;
 }
 
 export default function MessageForm({ conversationId }: MessageFormProps) {
+  const { data: session } = useSession();
   const { register, handleSubmit, watch, reset } = useForm<MessageDTO>();
   const queryClient = useQueryClient();
 
@@ -37,6 +39,17 @@ export default function MessageForm({ conversationId }: MessageFormProps) {
   };
 
   const contentWatch = watch("content");
+
+  // Si l'utilisateur n'est pas connecté, afficher un message
+  if (!session?.user) {
+    return (
+      <div className="relative my-5 p-4 border border-muted rounded-md bg-muted/50">
+        <p className="text-center text-muted-foreground">
+          Vous devez être connecté pour envoyer un message.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <form className="relative my-5" onSubmit={handleSubmit(onSubmit)}>

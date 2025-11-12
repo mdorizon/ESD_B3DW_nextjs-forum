@@ -15,9 +15,11 @@ datasource db {
 }
 
 model Conversation {
-  id    String  @id @default(cuid())
-  title String?
+  id       String  @id @default(cuid())
+  title    String?
+  authorId String
 
+  author   User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
   messages Message[]
 
   createdAt  DateTime  @default(now())
@@ -29,31 +31,35 @@ model Conversation {
 }
 
 model Message {
-  id      String @id @default(cuid())
-  content String
+  id       String @id @default(cuid())
+  content  String
+  authorId String
+
+  author   User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  Conversation   Conversation? @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  conversationId String?
 
   createdAt  DateTime  @default(now())
   updatedAt  DateTime? @updatedAt
   deletedAt  DateTime?
   archivedAt DateTime?
 
-  Conversation   Conversation? @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  conversationId String?
-
   @@map("message")
 }
 
 model User {
-  id            String    @id
+  id            String         @id
   name          String
   email         String
-  emailVerified Boolean   @default(false)
+  emailVerified Boolean        @default(false)
   image         String?
   bio           String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @default(now()) @updatedAt
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @default(now()) @updatedAt
   sessions      Session[]
   accounts      Account[]
+  conversations Conversation[]
+  messages      Message[]
 
   @@unique([email])
   @@map("user")

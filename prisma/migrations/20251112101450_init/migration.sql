@@ -2,6 +2,7 @@
 CREATE TABLE "conversation" (
     "id" TEXT NOT NULL,
     "title" TEXT,
+    "authorId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3),
     "deletedAt" TIMESTAMP(3),
@@ -14,11 +15,12 @@ CREATE TABLE "conversation" (
 CREATE TABLE "message" (
     "id" TEXT NOT NULL,
     "content" TEXT NOT NULL,
+    "authorId" TEXT NOT NULL,
+    "conversationId" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3),
     "deletedAt" TIMESTAMP(3),
     "archivedAt" TIMESTAMP(3),
-    "conversationId" TEXT,
 
     CONSTRAINT "message_pkey" PRIMARY KEY ("id")
 );
@@ -87,6 +89,12 @@ CREATE UNIQUE INDEX "user_email_key" ON "user"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "session_token_key" ON "session"("token");
+
+-- AddForeignKey
+ALTER TABLE "conversation" ADD CONSTRAINT "conversation_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "message" ADD CONSTRAINT "message_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "message" ADD CONSTRAINT "message_conversationId_fkey" FOREIGN KEY ("conversationId") REFERENCES "conversation"("id") ON DELETE CASCADE ON UPDATE CASCADE;

@@ -24,10 +24,26 @@ async function deleteById(id: string) {
   return response.json();
 }
 
+async function createConversation(data: { title: string }) {
+  const response = await fetch("/api/conversations", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to create conversation");
+  }
+  return response.json();
+}
+
 const ConversationService = {
   fetchConversations,
   fetchConversationById,
   deleteById,
+  createConversation,
 };
 
 export default ConversationService;

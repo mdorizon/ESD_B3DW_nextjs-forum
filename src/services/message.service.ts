@@ -49,10 +49,26 @@ export async function deleteById(id: string) {
   return response.json();
 }
 
+export async function updateMessage(id: string, data: { content: string }) {
+  const response = await fetch(`/api/messages/${id}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to update message");
+  }
+  return response.json();
+}
+
 const MessageService = {
   fetchMessages,
   createMessage,
   deleteById,
+  updateMessage,
 };
 
 export default MessageService;
