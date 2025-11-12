@@ -38,6 +38,7 @@ import {
   UserPlus,
   ChevronDown,
   Home,
+  Settings,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
@@ -258,9 +259,15 @@ export function AppSidebar() {
                   <DropdownMenuLabel>Mon compte</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
-                    <Link href="/account">
+                    <Link href={`/users/${session.user.id}`}>
                       <User className="mr-2 h-4 w-4" />
                       <span>Profil</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/account">
+                      <Settings className="mr-2 h-4 w-4" />
+                      <span>Paramètres</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
