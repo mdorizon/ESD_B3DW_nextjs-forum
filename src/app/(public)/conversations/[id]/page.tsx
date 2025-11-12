@@ -1,7 +1,6 @@
 import MessageForm from "@/components/app/message/MessageForm";
 import MessageList from "@/components/app/message/MessageList";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import ConversationHeader from "@/components/app/conversation/ConversationHeader";
 
 interface ConversationDetailPageProps {
   params: Promise<{ id: string }>;
@@ -13,28 +12,24 @@ export default async function ConversationDetailPage({
   const { id } = await params;
 
   console.log("Conversation ID:", id);
-  const response = await fetch(`http://localhost:3000/api/conversations/${id}`);
+  const response = await fetch(`http://localhost:3000/api/conversations/${id}`, {
+    cache: "no-store",
+  });
   const conversation = await response.json();
 
   return (
-    <div className="container mx-auto">
-      <div className="my-4">
-        <Link href="/" className="flex items-center mb-4">
-          <Button variant="link">&larr; Back to Conversations</Button>
-        </Link>
-      </div>
+    <div className="flex flex-col h-screen">
+      {/* Header statique en haut */}
+      <ConversationHeader conversation={conversation} />
 
-      <div className="bg-amber-100 p-4 rounded-md text-xl flex items-center gap-2">
-        Subject:
-        <h1>{conversation?.title}</h1>
-      </div>
-
-      <div>
-        <MessageForm conversationId={id} />
-      </div>
-
-      <div>
+      {/* Zone de messages avec scroll */}
+      <div className="flex-1 overflow-y-auto px-6 py-6">
         <MessageList conversationId={id} />
+      </div>
+
+      {/* Formulaire statique en bas */}
+      <div className="sticky bottom-0 bg-background border-t px-6 py-4">
+        <MessageForm conversationId={id} />
       </div>
     </div>
   );
