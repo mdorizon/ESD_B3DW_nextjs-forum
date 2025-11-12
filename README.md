@@ -334,9 +334,9 @@ Vous avez le **choix** entre deux solutions :
 
 4. **Créer les routes API d'authentification**
 
-   - POST `/api/auth/signup` - Inscription d'un nouvel utilisateur
-   - POST `/api/auth/signin` - Connexion d'un utilisateur
-   - POST `/api/auth/signout` - Déconnexion
+   - POST `/api/auth/sign-up/email` - Inscription d'un nouvel utilisateur
+   - POST `/api/auth/sign-in/email` - Connexion d'un utilisateur
+   - POST `/api/auth/sign-out` - Déconnexion
    - GET `/api/auth/session` - Récupérer la session active
 
 5. **Créer les pages et composants UI**

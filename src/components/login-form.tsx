@@ -21,10 +21,12 @@ export function LoginForm({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError("");
 
     try {
       const result = await signIn.email({
@@ -33,9 +35,7 @@ export function LoginForm({
       });
 
       if (result.error) {
-        toast.error("Erreur de connexion", {
-          description: result.error.message,
-        });
+        setError("Utilisateur ou mot de passe incorrect");
       } else {
         toast.success("Connexion réussie");
         setEmail("");
@@ -43,9 +43,7 @@ export function LoginForm({
         onSuccess?.();
       }
     } catch {
-      toast.error("Erreur", {
-        description: "Une erreur est survenue lors de la connexion",
-      });
+      setError("Une erreur est survenue lors de la connexion");
     } finally {
       setIsLoading(false);
     }
@@ -66,14 +64,24 @@ export function LoginForm({
       <FieldGroup>
         <Field>
           <FieldLabel htmlFor="email">Email</FieldLabel>
+          {error && (
+            <p className="text-xs text-destructive font-medium -mb-2 -mt-3">
+              {error}
+            </p>
+          )}
           <Input
             id="email"
             type="email"
             placeholder="exemple@email.com"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              setError("");
+            }}
             required
             disabled={isLoading}
+            aria-invalid={!!error}
+            className={error ? "border-destructive" : ""}
           />
         </Field>
         <Field>
@@ -82,9 +90,14 @@ export function LoginForm({
             id="password"
             type="password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              setError("");
+            }}
             required
             disabled={isLoading}
+            aria-invalid={!!error}
+            className={error ? "border-destructive" : ""}
           />
         </Field>
         <Field>
