@@ -69,7 +69,7 @@ export function LoginForm({
     setIsResetLoading(true);
 
     try {
-      await authClient.forgetPassword({
+      await authClient.requestPasswordReset({
         email: resetEmail,
         redirectTo: "/reset-password",
       });
@@ -165,7 +165,7 @@ export function LoginForm({
 
       {/* Dialog pour la réinitialisation du mot de passe */}
       <Dialog open={isResetDialogOpen} onOpenChange={setIsResetDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-106.25">
           <DialogHeader>
             <DialogTitle>Mot de passe oublié</DialogTitle>
             <DialogDescription>
